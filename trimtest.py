@@ -14,25 +14,17 @@ with wave.open('test2.wav') as fInput:
     waveData = np.reshape(waveData, [nframes, nchannels])
 
 outData = waveData
-window = int(du * framerate)
-num_times = math.floor(nframes / window)
+lenWindow = int(du * framerate)
+numWindow = math.floor(nframes / lenWindow)
 count = 0
-number = 0
-for i in range(0, num_times + 1):
-    start = i * window
-    end = min(window * (i + 1) - 1, nframes)
-    time = waveData[i * window:min(window * (i + 1) - 1, nframes), 0]
-    #data = waveData[:, 0]
-    #arr = range(i * time_length, min(time_length * (i + 1) - 1, nframes))
-    #time = np.take(waveData[:,0], arr)
-    max_value = max(time)
+for i in range(0, numWindow + 1):
+    tempCh1 = waveData[i * lenWindow:min(lenWindow * (i + 1) - 1, nframes), 0]
+    max_value = max(tempCh1)
     if max_value > th:
         count = count + 1
-        start = (count - 1) * window
-        end = start + len(time)
-        outData[start:end, 0] = time
-        outData[start:end, 1] = waveData[i * window:min(window * (i + 1) - 1, nframes), 1]
-x = outData[:end, 0]
-x2 = outData[:end, 1]
+        start = (count - 1) * lenWindow
+        end = start + len(tempCh1)
+        outData[start:end, 0] = tempCh1
+        outData[start:end, 1] = waveData[i * lenWindow:min(lenWindow * (i + 1) - 1, nframes), 1]
 outData = np.resize(outData,(end,2))
 print(1)
