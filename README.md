@@ -3,3 +3,4 @@ Auto record and trim SNH48 member live (in Pocket 48)
 
 ## Progress
 Finish auto record function in command line
+Trim the audio afterwards (remove the part without sound)
