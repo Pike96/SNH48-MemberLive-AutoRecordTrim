@@ -1,3 +1,4 @@
+import ffmpeg
 import wave
 import numpy as np
 import math
@@ -5,11 +6,19 @@ import struct
 
 du = 0.5
 th = 0.02
-inputFName = 'test2.wav'
-outputFName = 'test2[Trimmed].wav'
+inputFName = '刘崇恬的电台Oct19-07-45-04'
+outputFName = inputFName + '[Trimmed].wav'
+
+# Convert
+stream = ffmpeg.input(inputFName + '.mp4')
+stream = ffmpeg.output(stream, inputFName + '.wav')
+try:
+    ffmpeg.run(stream)
+except:
+    print('Error in converting')
 
 # Read
-with wave.open(inputFName) as fInput:
+with wave.open(inputFName + '.wav') as fInput:
     params = fInput.getparams()
     nchannels, sampwidth, framerate, nframes, comptype, compname = params[:6]
     strData = fInput.readframes(nframes)
