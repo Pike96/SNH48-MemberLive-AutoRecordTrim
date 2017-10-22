@@ -37,8 +37,12 @@ def record(name, interval):
         # print('json OK')
         print('Received ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
     else:
+        print('Error in getting response ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
         return 0
-    live_list = response_dict['content']['liveList']
+    try:
+        live_list = response_dict['content']['liveList']
+    except:
+        return 0
     for live_item in live_list:
         title = live_item['title']
         check = re.match("(.)*{}(.)*".format(name), title)
@@ -65,13 +69,13 @@ def record(name, interval):
                                    live_item['title'],
                                    time.strftime("%b%d-%H-%M", time.localtime(last_stamp / 1000))))
                                    '''
-    time.sleep(10)
 
 def main():
     # name = input("小偶像的姓名：")
     name = "刘崇恬"
     while 1:
         record(name, 10)
+        time.sleep(10)
     input('Enter to finish: ')
     return 0
 

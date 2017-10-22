@@ -6,7 +6,7 @@ import struct
 
 du = 0.5
 th = 0.02
-inputFName = '刘崇恬的电台Oct19-07-45-04'
+inputFName = '刘崇恬的电台Oct20-07-35-53'
 outputFName = inputFName + '[Trimmed].wav'
 
 # Convert
@@ -27,6 +27,7 @@ with wave.open(inputFName + '.wav') as fInput:
     waveData = np.reshape(waveData, [nframes, nchannels])
 
 # Trim
+print('Trimming...')
 outData = waveData
 lenWindow = int(du * framerate)
 numWindow = math.floor(nframes / lenWindow)
