@@ -31,7 +31,11 @@ def record(name, interval):
     last_stamp = int(time.time() * 1000)
     form = '{"lastTime":%s,"limit":20,"groupId":0,"memberId":0,"type":0,"giftUpdTime":1490857731000}' % \
            str(last_stamp)
-    response_json = postform(api48, form, headers)
+    try:
+        response_json = postform(api48, form, headers)
+    except:
+        print('Error in getting response ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
+        return 0
     response_dict = json.loads(response_json)
     if response_dict['status'] == 200:
         # print('json OK')
