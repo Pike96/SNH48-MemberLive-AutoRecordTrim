@@ -12,7 +12,7 @@ headers = {
     'User-Agent': 'Mobile_Pocket',
     'IMEI': '864394020228161',
     'token': '0',
-    'version': '4.0.4',
+    'version': '5.0.1',
     'Content-Type': 'application/json;charset=utf-8',
     'Host': 'plive.48.cn',
     'Connection': 'Keep-Alive',
@@ -33,14 +33,9 @@ def record(name, interval):
            str(last_stamp)
     try:
         response_json = postform(api48, form, headers)
-    except:
-        print('Error in getting response ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
-        return 0
-    response_dict = json.loads(response_json)
-    if response_dict['status'] == 200:
-        # print('json OK')
+        response_dict = json.loads(response_json)
         print('Received ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
-    else:
+    except:
         print('Error in getting response ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
         return 0
     try:

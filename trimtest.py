@@ -6,7 +6,7 @@ import struct
 
 du = 0.5
 th = 0.02
-inputFName = '刘崇恬的电台Oct20-07-35-53'
+inputFName = '刘崇恬的电台Oct22-07-32-20'
 outputFName = inputFName + '[Trimmed].wav'
 
 # Convert
@@ -42,11 +42,19 @@ for i in range(0, numWindow + 1):
         end = start + len(tempCh1)
         outData[start:end, 0] = tempCh1
         outData[start:end, 1] = waveData[i * lenWindow:min(lenWindow * (i + 1) - 1, nframes), 1]
-outData = np.resize(outData,(end,2))
+outData = np.resize(outData, (end, 2))
 
 # Save
-outData = np.reshape(outData,[end * nchannels, 1])
+outData = np.reshape(outData, [end * nchannels, 1])
 with wave.open(outputFName, 'wb') as outwave:
     outwave.setparams((nchannels, sampwidth, framerate, end, comptype, compname))
     for v in outData:
         outwave.writeframes(struct.pack('h', int(v * 64000 / 2)))  # outData:16位，-32767~32767，注意不要溢出
+
+# Convert output to MP3
+stream = ffmpeg.input(outputFName)
+stream = ffmpeg.output(stream, inputFName + '[Trimmed].mp3')
+try:
+    ffmpeg.run(stream)
+except:
+    print('Error in converting to MP3')
