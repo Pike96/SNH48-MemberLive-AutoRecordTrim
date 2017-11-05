@@ -6,7 +6,7 @@ import struct
 
 du = 0.5
 th = 0.02
-inputFName = '刘崇恬的电台Oct22-07-32-20'
+inputFName = '刘崇恬的直播间Nov04-09-43-43'
 outputFName = inputFName + '[Trimmed].wav'
 
 # Convert

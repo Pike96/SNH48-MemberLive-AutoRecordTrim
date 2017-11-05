@@ -8,7 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-class Ui_Dialog(object):
+class Ui_Main(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
         Dialog.resize(255, 245)
@@ -18,7 +18,7 @@ class Ui_Dialog(object):
         Dialog.setStyleSheet("QDialog {\n"
 " background-color: rgb(255, 255, 255);\n"
 "}")
-        Dialog.setSizeGripEnabled(False)
+        #Dialog.setSizeGripEnabled(False)
         self.plainTextEdit = QtWidgets.QPlainTextEdit(Dialog)
         self.plainTextEdit.setGeometry(QtCore.QRect(30, 90, 191, 41))
         font = QtGui.QFont()

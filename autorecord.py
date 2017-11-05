@@ -75,7 +75,6 @@ def main():
     while 1:
         record(name, 10)
         time.sleep(10)
-    input('Enter to finish: ')
     return 0
 
 
