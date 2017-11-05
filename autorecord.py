@@ -37,10 +37,12 @@ def record(name, interval):
         print('Received ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
     except:
         print('Error in getting response ' + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
+        time.sleep(interval)
         return 0
     try:
         live_list = response_dict['content']['liveList']
     except:
+        time.sleep(interval)
         return 0
     for live_item in live_list:
         title = live_item['title']
@@ -68,13 +70,14 @@ def record(name, interval):
                                    live_item['title'],
                                    time.strftime("%b%d-%H-%M", time.localtime(last_stamp / 1000))))
                                    '''
+            time.sleep(interval)
 
 def main():
     # name = input("小偶像的姓名：")
     name = "刘崇恬"
     while 1:
         record(name, 10)
-        time.sleep(10)
+
     return 0
 
 

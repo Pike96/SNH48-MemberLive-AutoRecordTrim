@@ -8,8 +8,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Main):
         self.setupUi(self)
         self.show()
         self.pushButton.clicked.connect(self.forgive)
+        self.recording = False
 
     # Connect buttons
 
     def forgive(self):
-        autorecord.main()
+        if self.recording is False:
+            name = self.plainTextEdit.toPlainText()
+            self.recording = True
+            while 1:
+                autorecord.record(name, 10)
+                if self.recording is False:
+                    break
+        else:
+            self.recording = False
