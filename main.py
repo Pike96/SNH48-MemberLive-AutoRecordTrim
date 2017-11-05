@@ -34,7 +34,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
             self.pushButton.setText("原谅她")
             self.buttonState = False
             self.timer.stop()
-            self.t.stop()
 
     def operate(self):
         name = self.plainTextEdit.toPlainText()

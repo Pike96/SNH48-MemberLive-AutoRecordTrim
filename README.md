@@ -1,7 +1,9 @@
 # SNH48-MemberLive-AutoRecordTrim (Under Construction)
 Auto record and trim SNH48 member live (in Pocket 48)
 
+![Alt text](https://github.com/Pike96/SNH48-MemberLive-AutoRecordTrim/raw/master/Screenshots/v1.0.0.png)
+
 ## Progress
-Finish auto record function in command line
+Finish 2 version of exe for auto record. One with Console, one without console.
 
 Trim the audio afterwards (remove the part without sound)
