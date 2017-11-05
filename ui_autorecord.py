@@ -3,8 +3,6 @@ import json
 import time
 import re
 import ffmpeg
-# import subprocess
-# from win10toast import ToastNotifier
 
 api48 = 'https://plive.48.cn/livesystem/api/live/v1/memberLivePage'
 headers = {
@@ -18,7 +16,6 @@ headers = {
     'Connection': 'Keep-Alive',
     'Accept-Encoding': 'gzip'
 }
-
 
 def postform(url, form, headers):
     data = bytes(form, encoding='utf8')
@@ -46,12 +43,6 @@ def record(name):
         title = live_item['title']
         check = re.match("(.)*{}(.)*".format(name), title)
         if check is not None:
-            '''
-            toaster = ToastNotifier()
-            toaster.show_toast("你老婆 " + name + " 直播啦!!!",
-                               "直播已经自动开始录制")
-                               '''
-
             print(live_item['title'] + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
             fname = '{}{}.mp4'.format(live_item['title'],
                                       time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
@@ -62,21 +53,3 @@ def record(name):
                 # remove()
             except:
                 print('Error in recording')
-            '''
-            subprocess.run('./ffmpeg -i {} {}{}.mp4'
-                           .format(live_item["streamPath"],
-                                   live_item['title'],
-                                   time.strftime("%b%d-%H-%M", time.localtime(last_stamp / 1000))))
-                                   '''
-
-def main():
-    # name = input("小偶像的姓名：")
-    name = "刘崇恬"
-    while 1:
-        record(name)
-        time.sleep(10)
-    return 0
-
-
-if __name__ == '__main__':
-    main()
