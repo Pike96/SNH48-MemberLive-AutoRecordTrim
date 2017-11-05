@@ -22,6 +22,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.operate)
         self.t = Job()
+        self.recordingMonitor = QtCore.QTimer()
+        self.recordingMonitor.timeout.connect(self.judge)
 
     def forgive(self):
         if self.buttonState is False:
@@ -39,6 +41,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
         self.record(name)
         if self.recording is True:
             self.timer.stop()
+            self.recordingMonitor.start(1000)
+
+    def judge(self):
+        if self.t.finished is True:
+            self.recordingMonitor.stop()
+            self.timer.start(5000)
 
     @staticmethod
     def postform(url, form, headers):
@@ -75,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
                     self.t.setDaemon(True)
                     self.t.start()
                     self.label_2.setText('正在录制：' + fname)
-                    self.recording = True;
+                    self.recording = True
                 except:
                     self.label_2.setText('录制出错')
 
