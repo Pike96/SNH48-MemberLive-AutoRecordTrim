@@ -6,7 +6,13 @@ from urllib import request
 import json
 import time
 import re
-import ffmpeg
+import ffmpy
+
+import wave
+import numpy as np
+import math
+import struct
+
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -16,9 +22,9 @@ class Ui_Dialog(object):
         Dialog.setMaximumSize(QtCore.QSize(500, 360))
         Dialog.setWindowTitle("")
         Dialog.setStyleSheet("QDialog {\n"
-" background-color: rgb(255, 255, 255);\n"
-"}")
-        #Dialog.setSizeGripEnabled(False)
+                             " background-color: rgb(255, 255, 255);\n"
+                             "}")
+        # Dialog.setSizeGripEnabled(False)
         self.label = QtWidgets.QLabel(Dialog)
         self.label.setGeometry(QtCore.QRect(150, 20, 201, 61))
         font = QtGui.QFont()
@@ -33,16 +39,16 @@ class Ui_Dialog(object):
         font.setPointSize(12)
         self.pushButton.setFont(font)
         self.pushButton.setStyleSheet("QPushButton:pressed {\n"
-"    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,   stop:0 rgba(60, 186, 162, 255), stop:1 rgba(98, 211, 162, 255))\n"
-"}\n"
-"QPushButton {\n"
-"     background-color: #3cbaa2; border: 0px solid black;\n"
-"     border-radius: 7px;\n"
-"}\n"
-"\n"
-"QPushButton:disabled {\n"
-"    background-color: rgb(170, 170, 127)\n"
-"}")
+                                      "    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,   stop:0 rgba(60, 186, 162, 255), stop:1 rgba(98, 211, 162, 255))\n"
+                                      "}\n"
+                                      "QPushButton {\n"
+                                      "     background-color: #3cbaa2; border: 0px solid black;\n"
+                                      "     border-radius: 7px;\n"
+                                      "}\n"
+                                      "\n"
+                                      "QPushButton:disabled {\n"
+                                      "    background-color: rgb(170, 170, 127)\n"
+                                      "}")
         self.pushButton.setObjectName("pushButton")
         self.label_2 = QtWidgets.QLabel(Dialog)
         self.label_2.setGeometry(QtCore.QRect(21, 234, 461, 41))
@@ -77,6 +83,7 @@ class Ui_Dialog(object):
         self.label.setText(_translate("Dialog", "想被哪个小宝宝甜呀~"))
         self.pushButton.setText(_translate("Dialog", "原谅她"))
 
+
 class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
     def __init__(self):
         super().__init__()
@@ -90,6 +97,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
         self.t = Job()
         self.recordingMonitor = QtCore.QTimer()
         self.recordingMonitor.timeout.connect(self.judge)
+        self.fname = ''
         self.lineEdit.returnPressed.connect(self.pushButton.click)
 
         self.api48 = 'https://plive.48.cn/livesystem/api/live/v1/memberLivePage'
@@ -109,7 +117,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
         if self.buttonState is False:
             self.pushButton.setText("不再原谅")
             self.buttonState = True
-            self.timer.start(5000)
+            #self.operate()
+            self.timer.start(10000)
         else:
             self.pushButton.setText("原谅她")
             self.buttonState = False
@@ -117,15 +126,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
 
     def operate(self):
         name = self.lineEdit.text()
-        self.record(name)
+        self.fname = self.record(name)
         if self.recording is True:
             self.timer.stop()
-            self.recordingMonitor.start(1000)
+            self.recordingMonitor.start(3000)
 
     def judge(self):
         if self.t.finished is True:
             self.recordingMonitor.stop()
-            self.timer.start(5000)
+            self.timer.start(10000)
+            self.t.finished = False
+            t_trim = Job(target=self.trim, args=(self.fname,))
+            t_trim.setDaemon(True)
+            t_trim.start()
 
     @staticmethod
     def postform(url, form, headers):
@@ -153,18 +166,84 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
             title = live_item['title']
             check = re.match("(.)*{}(.)*".format(name), title)
             if check is not None:
-                fname = '{}{}.mp4'.format(live_item['title'],
-                                          time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000)))
-                stream = ffmpeg.input(live_item["streamPath"])
-                stream = ffmpeg.output(stream, fname)
+                fname = live_item['title'] + time.strftime("%b%d-%H-%M-%S", time.localtime(last_stamp / 1000))
+                ff = ffmpy.FFmpeg(
+                    inputs={live_item["streamPath"]: None},
+                    outputs={fname + '.mp4': None}
+                )
                 try:
-                    self.t = Job(target=ffmpeg.run, args=(stream,))
+                    self.t = Job(target=ff.run)
                     self.t.setDaemon(True)
                     self.t.start()
-                    self.label_2.setText('正在录制：' + fname)
+                    self.label_2.setText('正在录制：' + fname + '.mp4 ...')
                     self.recording = True
                 except:
                     self.label_2.setText('录制出错')
+                return fname
+
+    def trim(self, fname):
+        self.label_3.setText('开始保留人声：' + self.fname + '.mp4 ...')
+
+        du = 0.5
+        th = 0.02
+        inputFName = fname
+        outputFName = inputFName + '[Trimmed].wav'
+
+        # Convert
+        ff2 = ffmpy.FFmpeg(
+            inputs={inputFName + '.mp4': None},
+            outputs={inputFName + '.wav': None}
+        )
+        try:
+            ff2.run()
+        except:
+            self.label_3.setText('MP4转wav失败')
+
+        # Read
+        with wave.open(inputFName + '.wav') as fInput:
+            params = fInput.getparams()
+            nchannels, sampwidth, framerate, nframes, comptype, compname = params[:6]
+            strData = fInput.readframes(nframes)
+            waveData = np.fromstring(strData, dtype=np.int16)
+            waveData = waveData * 1.0 / (max(abs(waveData)))
+            waveData = np.reshape(waveData, [nframes, nchannels])
+
+        # Trim
+        self.label_3.setText('人声保留处理中 ...')
+        outData = waveData
+        lenWindow = int(du * framerate)
+        numWindow = math.floor(nframes / lenWindow)
+        count = 0
+        end = nframes
+        for i in range(0, numWindow + 1):
+            tempCh1 = waveData[i * lenWindow:min(lenWindow * (i + 1) - 1, nframes), 0]
+            max_value = max(tempCh1)
+            if max_value > th:
+                count += 1
+                start = (count - 1) * lenWindow
+                end = start + len(tempCh1)
+                outData[start:end, 0] = tempCh1
+                outData[start:end, 1] = waveData[i * lenWindow:min(lenWindow * (i + 1) - 1, nframes), 1]
+        outData = np.resize(outData, (end, 2))
+
+        # Save
+        outData = np.reshape(outData, [end * nchannels, 1])
+        with wave.open(outputFName, 'wb') as outwave:
+            outwave.setparams((nchannels, sampwidth, framerate, end, comptype, compname))
+            for v in outData:
+                outwave.writeframes(struct.pack('h', int(v * 64000 / 2)))  # outData:16位，-32767~32767，注意不要溢出
+
+        # Convert output to MP3
+        ff2 = ffmpy.FFmpeg(
+            inputs={outputFName: None},
+            outputs={inputFName + '[Trimmed].mp3': None}
+        )
+        try:
+            ff2.run()
+        except:
+            self.label_3.setText('WAV转MP3失败')
+
+        self.label_3.setText('人声保留完毕')
 
 
 class Job(threading.Thread):
@@ -205,6 +284,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)
     execution = MainWindow()
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

@@ -24,6 +24,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
         self.t = Job()
         self.recordingMonitor = QtCore.QTimer()
         self.recordingMonitor.timeout.connect(self.judge)
+        self.lineEdit.returnPressed.connect(self.pushButton.click)
 
     def forgive(self):
         if self.buttonState is False:
@@ -36,7 +37,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Dialog):
             self.timer.stop()
 
     def operate(self):
-        name = self.plainTextEdit.toPlainText()
+        name = self.lineEdit.text()
         self.record(name)
         if self.recording is True:
             self.timer.stop()
